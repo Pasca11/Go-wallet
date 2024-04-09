@@ -26,7 +26,7 @@ func NewPostgresStorage() (*PostgresStorage, error) {
 	}, nil
 }
 
-func (s *PostgresStorage) init() error {
+func (s *PostgresStorage) Init() error {
 	return s.createAccountTable()
 }
 

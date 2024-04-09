@@ -2,19 +2,19 @@ package main
 
 import (
 	"github.com/Pasca11/internal/http/handlers"
-	storage2 "github.com/Pasca11/storage"
+	"github.com/Pasca11/storage"
 	"log"
 )
 
 func main() {
-	storage, err := storage2.NewPostgresStorage()
+	store, err := storage.NewPostgresStorage()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = storage.init()
+	err = store.Init()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	app := handlers.NewApp(":3000", storage)
+	app := handlers.NewApp(":3000", store)
 	app.Start()
 }
