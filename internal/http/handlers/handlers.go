@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/Pasca11/internal/http/utls"
+	"github.com/Pasca11/internal/http/utils"
 	storage2 "github.com/Pasca11/storage"
 	"github.com/Pasca11/types"
 	"github.com/gorilla/mux"
@@ -24,7 +24,7 @@ func (a *App) handleGetAccountByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Cant find user. Try again", http.StatusInternalServerError)
 		return
 	}
-	utls.RenderJSON(w, 200, acc)
+	utils.RenderJSON(w, 200, acc)
 }
 func (a *App) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 	accs, err := a.storage.GetAllAccounts()
@@ -32,7 +32,7 @@ func (a *App) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	utls.RenderJSON(w, 200, accs)
+	utils.RenderJSON(w, 200, accs)
 }
 
 func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +50,7 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenStr, err := utls.createJWT(acc)
+	tokenStr, err := utils.CreateJWT(acc)
 	if err != nil {
 		http.Error(w, "Cant create token", http.StatusInternalServerError)
 		return
@@ -61,7 +61,7 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utls.RenderJSON(w, 200, types.LoginResponse{
+	utils.RenderJSON(w, 200, types.LoginResponse{
 		Wallet: acc.Wallet,
 		Token:  tokenStr,
 	})
@@ -95,7 +95,7 @@ func (a *App) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println(tokenString)
 	//w.Header().Add("Authorization", tokenString)
 
-	utls.RenderJSON(w, 200, acc)
+	utils.RenderJSON(w, 200, acc)
 }
 
 func (a *App) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +110,7 @@ func (a *App) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	utls.RenderJSON(w, http.StatusOK, map[string]int{"deleted": id})
+	utils.RenderJSON(w, http.StatusOK, map[string]int{"deleted": id})
 }
 
 func (a *App) handelTransfer(w http.ResponseWriter, r *http.Request) {
@@ -121,8 +121,7 @@ func (a *App) handelTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	claims, err := utls.getClaimsFromRequest(r)
+	claims, err := utils.GetClaimsFromRequest(r)
 	if err != nil {
 		http.Error(w, err.Error()+"2", http.StatusBadRequest)
 		return
@@ -142,7 +141,7 @@ func (a *App) handelTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utls.RenderJSON(w, http.StatusOK, "transfer succeeded")
+	utils.RenderJSON(w, http.StatusOK, "transfer succeeded")
 }
 
 // TODO take key from env
@@ -150,13 +149,13 @@ const secretKey = "secret"
 
 func JWTMiddleware(h http.HandlerFunc, s storage2.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		claims, err := utls.getClaimsFromRequest(r)
+		claims, err := utils.GetClaimsFromRequest(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		id, err := utls.getIDFromRequest(r)
+		id, err := utils.GetIDFromRequest(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
