@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Pasca11/types"
 	"github.com/jmoiron/sqlx"
@@ -76,21 +79,26 @@ func (s *PostgresStorage) UpdateAccount(account *types.Account) error {
 
 func (s *PostgresStorage) GetAccountByID(id int) (*types.Account, error) {
 	stmt := "SELECT * FROM account WHERE id=$1"
-	var acc types.Account
-	err := s.db.Get(&acc, stmt, id)
+	acc := new(types.Account)
+	err := s.db.Get(acc, stmt, id)
 	if err != nil {
+		if errors.Is(err, sql.ErrConnDone) {
+			//TODO handle
+		}
 		return nil, err
 	}
-	return &acc, nil
+	return acc, nil
 }
 
-func (s *PostgresStorage) GetAccountByWallet(wallet int) (*types.Account, error) {
+func (s *PostgresStorage) GetAccountByWallet(wallet int) (types.Account, error) {
 	stmt := "SELECT * FROM account WHERE wallet=$1"
 	var acc types.Account
 	err := s.db.Get(&acc, stmt, wallet)
 	if err != nil {
 		return nil, err
 	}
+
+	// Проблема висячего указателя
 	return &acc, nil
 }
 
@@ -102,7 +110,9 @@ func (s *PostgresStorage) GetAllAccounts() ([]*types.Account, error) {
 }
 
 func (s *PostgresStorage) Transfer(req types.TransferRequest) error {
-	tx, err := s.db.Begin()
+	tx, err := s.db.BeginTx(context.Background(), sql.TxOptions{
+		Isolation: 2,
+	})
 	if err != nil {
 		return err
 	}

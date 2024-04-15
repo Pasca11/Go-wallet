@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	storage2 "github.com/Pasca11/storage"
+	"github.com/Pasca11/storage"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -9,10 +9,10 @@ import (
 
 type App struct {
 	ListenAddr string
-	storage    storage2.Storage
+	storage    storage.Storage
 }
 
-func NewApp(address string, storage storage2.Storage) *App {
+func NewApp(address string, storage storage.Storage) *App {
 	return &App{
 		ListenAddr: address,
 		storage:    storage,
