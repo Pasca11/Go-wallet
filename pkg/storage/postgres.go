@@ -98,8 +98,7 @@ func (s *PostgresStorage) GetAccountByWallet(wallet int) (types.Account, error) 
 		return nil, err
 	}
 
-	// Проблема висячего указателя
-	return &acc, nil
+	return acc, nil
 }
 
 func (s *PostgresStorage) GetAllAccounts() ([]*types.Account, error) {
@@ -110,7 +109,7 @@ func (s *PostgresStorage) GetAllAccounts() ([]*types.Account, error) {
 }
 
 func (s *PostgresStorage) Transfer(req types.TransferRequest) error {
-	tx, err := s.db.BeginTx(context.Background(), sql.TxOptions{
+	tx, err := s.db.BeginTx(context.Background(), &sql.TxOptions{
 		Isolation: 2,
 	})
 	if err != nil {

@@ -11,6 +11,6 @@ type Storage interface {
 	GetAllAccounts() ([]*types.Account, error)
 	GetAccountByID(id int) (*types.Account, error)
 	UpdateAccount(account *types.Account) error
-	GetAccountByWallet(wallet int) (*types.Account, error)
+	GetAccountByWallet(wallet int) (types.Account, error)
 	Transfer(req types.TransferRequest) error
 }
